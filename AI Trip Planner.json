@@ -1,0 +1,1846 @@
+{
+  "name": "AI Trip Planner",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        320,
+        784
+      ],
+      "id": "50d18a25-e16f-488d-b252-7f830bfa1068",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "J4aGWRFLKp0jB3Z0",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -592,
+        432
+      ],
+      "id": "cad0f53e-a215-4b05-bce3-9424f5054e2f",
+      "name": "Telegram Trigger",
+      "webhookId": "b2583859-06e7-4953-adc2-9d7d65a3121a",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "message.text",
+              "newKey": "chatInput"
+            },
+            {
+              "currentKey": "message.chat.id",
+              "newKey": "chat.id"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        432
+      ],
+      "id": "a997ac19-a6ac-4d3e-9737-8e8c17ff4e0b",
+      "name": "Rename Keys"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        688
+      ],
+      "id": "a569b487-d583-413b-91e0-2d48aaa2fe73",
+      "name": "Send a text message",
+      "webhookId": "08af121d-bd08-4b71-b52d-abd8cdd030f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        448,
+        784
+      ],
+      "id": "bea7c750-7d3c-43c4-b0a9-008d30d8162c",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.chatInput }}",
+                    "rightValue": "/plan",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "a6354984-6216-4ffb-9099-04e0cfb748e6"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "be181df6-c24e-4b85-a78a-aae75258effc",
+                    "leftValue": "={{ $json.chatInput }}",
+                    "rightValue": "/start",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "74801b54-40e9-4371-828d-134a18bd5144",
+                    "leftValue": "={{ $json.chatInput }}",
+                    "rightValue": "/help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ae0a6356-8417-4a7c-9ee4-93fd808cb848",
+                    "leftValue": "={{ $json.chatInput }}",
+                    "rightValue": "(^\\/plan)|(^\\/start)|(^\\/help)",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notRegex"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        128
+      ],
+      "id": "6e2cde2e-ad92-4535-932c-783309c2f1b7",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Hello, {{$json.message.from.username  }}! \n\nThis bot can help you plan your next trip!\nTry `/help` to learn how to use it\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        64
+      ],
+      "id": "098d174e-91ac-428f-a057-c09c0f23b119",
+      "name": "Send start message",
+      "webhookId": "08af121d-bd08-4b71-b52d-abd8cdd030f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Welcome to AI Trip Planner!\n\nGoing new places? This bot backs you up!\n\nTry `\\plan Visit to Japan with a group of friends` to get a detailed plan in the Google Doc. The bot will make a proposal, ask if it works for you and hand you a ready-to-go document!\n\nYou can also ask a free text question `What is the currency in Japan?` to get handy info in your trip\n\nDo not hesitate to call \\help, if you have any questions :)\n\n\n\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        256
+      ],
+      "id": "955a9db1-9997-44d8-9c3e-ea308ccd8c91",
+      "name": "Send help message",
+      "webhookId": "08af121d-bd08-4b71-b52d-abd8cdd030f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-browserbase.browserbaseTool",
+      "typeVersion": 3,
+      "position": [
+        576,
+        784
+      ],
+      "id": "462618ea-bf0a-4443-ba08-860e2a682e3a",
+      "name": "Browserbase",
+      "credentials": {
+        "browserbaseApi": {
+          "id": "sNL5cCVIDy3FQ2Bm",
+          "name": "Browserbase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1152,
+        688
+      ],
+      "id": "8d9f9b6f-c97c-47d7-b942-381a6cef60b9",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2064,
+        -48
+      ],
+      "id": "7c091db9-70ab-40bc-a7a0-5f0085d93a5a",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "J4aGWRFLKp0jB3Z0",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        2192,
+        -48
+      ],
+      "id": "b988d6c8-3a86-434f-8d7c-d0450c6cd8e4",
+      "name": "Wikipedia1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-browserbase.browserbaseTool",
+      "typeVersion": 3,
+      "position": [
+        2320,
+        -48
+      ],
+      "id": "466b06f7-b601-470b-b3b5-0f3047860368",
+      "name": "Browserbase1",
+      "credentials": {
+        "browserbaseApi": {
+          "id": "sNL5cCVIDy3FQ2Bm",
+          "name": "Browserbase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"summary\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"request\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n      \"body\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"title\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2448,
+        -48
+      ],
+      "id": "0947f5b3-b931-43ab-ba3e-8773596706b4",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "message": "={{ $json.output.summary }}",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldType": "html",
+              "elementName": "request",
+              "html": "{{ $json.output.request }}"
+            },
+            {
+              "fieldType": "html",
+              "elementName": "Summary",
+              "html": "{{ $json.output.summary }}"
+            },
+            {
+              "fieldLabel": "Do you like it?",
+              "fieldType": "radio",
+              "defaultValue": "Yes",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Do you want to specify and add something else?"
+            },
+            {
+              "fieldName": "chatId",
+              "fieldType": "hiddenField",
+              "fieldValue": "={{ $('Telegram Trigger').item.json.message.message_id }}-{{ $('Telegram Trigger').item.json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2640,
+        -192
+      ],
+      "id": "6c1cb1a5-4ff7-4519-9479-d15ed8e47b20",
+      "name": "Send message and wait for response",
+      "webhookId": "1623c28b-0122-4d62-a6ce-6294b0d19acb",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9fc34af2-9bf6-41ad-b821-521555a2f771",
+              "leftValue": "={{ $json.data[\"Do you like it?\"] }}",
+              "rightValue": "Yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2864,
+        -128
+      ],
+      "id": "93413d80-1f1c-4a9d-aa30-68a1e9d521c6",
+      "name": "Keep or redo"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ec8e61cf-1965-4de2-970f-6445b5133036",
+              "leftValue": "={{ $json.redo_count }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1152,
+        -512
+      ],
+      "id": "acb21697-f464-47f7-b04c-d213193cf3af",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5bd6b995-fe1b-416e-a42d-dc5683cf85bc",
+              "name": "system_prompt",
+              "value": "=You are a helpful AI Trip planner assistant. Answer a person in polite and helpful mode. The user wants to plan their visit: {{ $json.chatInput }}. Help them do it.  You need to return a JSON with schema {'request, 'summary', 'body', 'title'}, where summary is a short message description of the upcoming plan, and body will be used in a Google Doc in the workflow, so use proper markdown.  Among other things, include: - Short description of location with wiki tool - Main sights list (you can use tripadvisor, guides) depending on user preferences from the input. If no preferences given, give some most popular sights - Expected budget, including average night cost in hostel and hotel, unless something else is asked - Transportation system, costs, etc. Do not include travel information from a specific city, unless given - If time is given (e.g. trip for 2 days), plan the trip accordingly. If no time is given, assume it is a weekend (1 night). - Include anything else if you consider it important\n\nIn the  summary include main sights (just a list) mode (peaceful, explorative, etc) and expected budget",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1600,
+        -48
+      ],
+      "id": "ed71484c-d63e-4d0e-a7c1-44e69e3f3246",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5bd6b995-fe1b-416e-a42d-dc5683cf85bc",
+              "name": "system_prompt",
+              "value": "=You are a helpful AI Trip planner assistant. Answer a person in polite and helpful mode.\n\nThe user want to plan their visit {{ $json.data.request }}. Help them do it\n\nYou need to return a json with schema {'request, 'summary', 'body', 'title'}, where summary is a short message description of coming plan, and body will be used in google doc in the workflow, so do proper markdown\n\nAmong other things, include:\n- short description of location with wiki tool\n- Main sights list (you can use tripadvisor, guides) depending on user preferences from the input. If no preferences given, give some most popular sights\n- Expected budget, including average night cost in hostel and hotel, unless something else is asked\n- Transportation system, costs, etc. Do not include travel information from specific city, unless given\n- if time is given (trip for 2 days), plan the trip accordingly. If no time is given, assume it is weekend (1 night).\n- Include anything else if you consider important\n\nYour previous report was\n'{{ $json.data.Summary }}' and it\ndid not meet user expectation. Here is their feedback. Please, make a new proposal under their expectations: {{ $json.data['Do you want to specify and add something else?'] }}. If there is none, try new approach\n\nIn the  summary include main sights (just a list) mode (peaceful, explorative, etc) and expected budget",
+              "type": "string"
+            },
+            {
+              "id": "ad5d470e-49a1-4576-acb2-73cc276d5105",
+              "name": "chatInput",
+              "value": "={{ $json.data.request }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1600,
+        -512
+      ],
+      "id": "df817c0e-8f5a-4c9c-b635-18070fdf0684",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ec8e61cf-1965-4de2-970f-6445b5133036",
+              "leftValue": "={{ $json.redo_count }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "a35b0c29-ea52-4732-b391-1b148c22dce6",
+              "leftValue": "={{ $json.redo_count }}",
+              "rightValue": 3,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1376,
+        -608
+      ],
+      "id": "154702da-33a4-4642-8648-5f1a0a8e9d6e",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5156ed71-29ae-4727-9b26-a57f81e2e66b",
+              "name": "redo_count",
+              "value": "={{ ($json.redo_count || 0) + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "f5632e52-1198-45dd-bad9-c27e0ccd6d8e",
+              "name": "messageuniqueid",
+              "value": "={{ $('Telegram Trigger').item.json.message.message_id }}-{{ $('Telegram Trigger').item.json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3088,
+        96
+      ],
+      "id": "9e14e96d-5eae-4e5c-b959-9130ee2214b9",
+      "name": "Set Redo Count"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21f595cb-27ac-4a2f-af3a-8f3e623895e9",
+              "name": "messageuniqueid",
+              "value": "={{ $json.message.message_id }}-{{ $json.message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "65d2fc73-3997-461b-b35a-cf20ab5f9847",
+              "name": "sessionId",
+              "value": "1",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -144,
+        160
+      ],
+      "id": "560ad0ce-7f9a-4008-b8d7-885582041279",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "messageuniqueid",
+        "joinMode": "keepEverything",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        624,
+        -384
+      ],
+      "id": "b8aec6a4-3f87-4688-ba58-78511ea9ff25",
+      "name": "Merge1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1824,
+        -416
+      ],
+      "id": "c067a768-e8a0-4ba3-8714-5ddeff739006",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.data.chatId.substring(4, 100) }}",
+        "text": "=I'm sorry, but I can't help you this time. Maybe try something else?",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        -704
+      ],
+      "id": "bb3572e5-85e9-4870-8a97-ccad1360059a",
+      "name": "Send end message",
+      "webhookId": "08af121d-bd08-4b71-b52d-abd8cdd030f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "default",
+        "title": "={{ ($('Smart AI Trip Planner').item.json.output.title || $('Smart AI Trip Planner').item.json.output.request.substring(6)).toUpperCase() }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        3088,
+        -176
+      ],
+      "id": "ae044960-0d8b-466b-b0bd-065b18c4ab1e",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "WyibBzw1jTTtacB9",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Merge2').item.json.data.chatId.substring(4,100)}}",
+        "text": "=Hey, here is your [link](https://docs.google.com/document/d/{{ $json.id }})! \n\nDo not hesitate to stop by, if you need anything else",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3536,
+        -416
+      ],
+      "id": "ecc5b7c1-a76e-4b16-a282-83ccd1f59206",
+      "name": "Send end message1",
+      "webhookId": "08af121d-bd08-4b71-b52d-abd8cdd030f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3312,
+        -336
+      ],
+      "id": "5d58ae1a-fb53-4fba-988d-85aa27eeb591",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "={{ $json.system_prompt }}",
+          "tracingMetadata": {
+            "values": [
+              {
+                "key": "=message.chat.id",
+                "stringValue": "="
+              }
+            ]
+          },
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2176,
+        -272
+      ],
+      "id": "3659cc08-0de2-4055-94b2-e1c184edf607",
+      "name": "Smart AI Trip Planner",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "notes": "\n[\n  \n{\n  \n  \n\"request\": \n\"Trip request\",\n  \n  \n\"summary\": \n\"Trip to Tokyo summary\",\n  \n  \n\"body\": \n\"big markdown text with all necessary details\",\n  \n  \n\"title\": \n\"test doc for the trips\"\n  \n}\n]"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful AI Trip planner assistant. Answer a person in polite and helpful mode.\n\nThe user can work in 2 modes:\n- they can ask to help you plan their trip. In this case, return the message 'Please use **plan** mode: /plan {{input}}'\n- they can ask some handy information about their trip (what is the currency in japan, what is eur-jpy exchange rate). Then use wiki tool or web search tool and return short message with concise answer.\n\n",
+          "tracingMetadata": {
+            "values": [
+              {
+                "key": "=message.chat.id",
+                "stringValue": "="
+              }
+            ]
+          },
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        560,
+        560
+      ],
+      "id": "638dd56e-faf7-42f4-bf83-5b26260fad36",
+      "name": "General Knowledge AI"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.data?.chatId?.substring(4) ?? $json.message?.from?.id }}",
+        "text": "Working on your request... It can take a couple of minutes",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2240,
+        -560
+      ],
+      "id": "eb9a9eaa-ae1b-4217-a3ea-4caafc7aa69c",
+      "name": "Send a text message1",
+      "webhookId": "fc8492a5-2484-43ab-9b91-3776a3028abe",
+      "credentials": {
+        "telegramApi": {
+          "id": "8Jy5nEr2ruaWko4c",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "function markdownToHtml(md) {\n  if (!md) return '';\n\n  let html = md\n    // Escape basic HTML entities\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n\n    // Headers\n    .replace(/^### (.*$)/gim, '<h3>$1</h3>')\n    .replace(/^## (.*$)/gim, '<h2>$1</h2>')\n    .replace(/^# (.*$)/gim, '<h1>$1</h1>')\n\n    // Bold and Italic\n    .replace(/\\*\\*\\*(.*?)\\*\\*\\*/g, '<strong><em>$1</em></strong>')\n    .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')\n    .replace(/\\*(.*?)\\*/g, '<em>$1</em>')\n    .replace(/___(.*?)___/g, '<strong><em>$1</em></strong>')\n    .replace(/__(.*?)__/g, '<strong>$1</strong>')\n    .replace(/_(.*?)_/g, '<em>$1</em>')\n\n    // Blockquotes\n    .replace(/^\\> (.*$)/gim, '<blockquote>$1</blockquote>')\n\n    // Inline Code\n    .replace(/`([^`]+)`/g, '<code>$1</code>')\n\n    // Unordered Lists\n    .replace(/^\\s*[\\-\\*]\\s+(.*$)/gim, '<ul><li>$1</li></ul>')\n\n    // Ordered Lists\n    .replace(/^\\s*\\d+\\.\\s+(.*$)/gim, '<ol><li>$1</li></ol>')\n\n    // Fix adjacent list tags\n    .replace(/<\\/ul>\\s*<ul>/g, '')\n    .replace(/<\\/ol>\\s*<ol>/g, '')\n\n    // Links\n    .replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href=\"$2\">$1</a>')\n\n    // Paragraphs (lines with text not inside tags)\n    .replace(/^(?!<h|<ul|<ol|<blockquote|<code|<li)(.+)$/gim, '<p>$1</p>');\n\n  return html.trim();\n}\n\nconst rawMarkdown = $input.first().json.output.body || \"\";\nconst htmlContent = markdownToHtml(rawMarkdown);\n\nconst styledHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.5; color: #333; }\n    h1 { font-size: 20pt; color: #1155cc; margin-top: 18pt; margin-bottom: 6pt; }\n    h2 { font-size: 16pt; color: #434343; margin-top: 14pt; margin-bottom: 4pt; }\n    h3 { font-size: 13pt; color: #666666; margin-top: 12pt; margin-bottom: 4pt; }\n    p { margin-bottom: 8pt; }\n    ul, ol { margin-top: 0; margin-bottom: 8pt; padding-left: 20pt; }\n    li { margin-bottom: 4pt; }\n    blockquote { border-left: 3px solid #ccc; padding-left: 10px; color: #555; font-style: italic; }\n    code { font-family: 'Courier New', monospace; background-color: #f4f4f4; padding: 2px 4px; }\n  </style>\n</head>\n<body>\n  ${htmlContent}\n</body>\n</html>\n`;\n\nreturn {\n  html: styledHtml,\n  documentTitle: $input.first().json.output.request || \"Imported Document\"\n};"
+      },
+      "id": "876d95f6-a876-4b9d-b9ff-48d00cb193ff",
+      "name": "Function Node",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        3088,
+        -464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/upload/drive/v3/files/{{ $('Create a document').item.json.id }}?uploadType=media ",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "text/html; charset=UTF-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3760,
+        -224
+      ],
+      "id": "b8051ce9-a531-49cc-a54a-036ba91056c1",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "WyibBzw1jTTtacB9",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const htmlContent = $json.html || \"<h1>No Content</h1>\";\n\n// Extract title safely using pure JavaScript\nconst rawTitle = $json.data?.title || ($json.data?.request ? $json.data.request.substring(6) : null);\nconst docTitle = rawTitle || \"Imported Document\";\n\nreturn [{\n  json: {\n    documentTitle: docTitle\n  },\n  binary: {\n    data: {\n      data: Buffer.from(htmlContent, 'utf-8').toString('base64'),\n      mimeType: 'text/html',\n      fileName: `${docTitle}.html`\n    }\n  }\n}];"
+      },
+      "id": "32b15191-54a4-495c-a261-e30dcb2535ea",
+      "name": "Function Node1",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        3536,
+        -224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/FILLME/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "document"
+          ],
+          "schema": [
+            {
+              "id": "user",
+              "displayName": "user",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "document",
+              "displayName": "document",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_updated",
+              "displayName": "last_updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3984,
+        -416
+      ],
+      "id": "49ae5094-cfc4-47b5-9b6a-98fe20fce582",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITu5LkObPEn3PXmB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bf4fe52c-fc57-4789-b513-e1df476a8e14",
+              "name": "user",
+              "value": "={{ $json.result.message_id.substring(4) }}",
+              "type": "string"
+            },
+            {
+              "id": "1c9a735d-65e4-45d6-98fa-ea50b796a1b2",
+              "name": "document",
+              "value": "={{ $('Merge2').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "fa343788-c4b0-4b8c-8a5d-6f69902a3728",
+              "name": "last_updated",
+              "value": "={{ $now }}",
+              "type": "object"
+            },
+            {
+              "id": "395d926f-a530-42f1-9416-c1a8af485c20",
+              "name": "title",
+              "value": "={{ $('Function Node').item.json.documentTitle }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3760,
+        -416
+      ],
+      "id": "93058da6-28d4-4f0a-b119-fed09c8eec7f",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {},
+      "id": "997edf92-3a84-48f8-8aca-ffb0bc414359",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -592,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Sub-workflow: Custom tool",
+        "height": 612.0936015224503,
+        "width": 1449.2963504228514,
+        "color": 7
+      },
+      "id": "567fb3a3-a9c8-48aa-9e40-a14515cb3a9d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -816,
+        832
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "=https://docs.google.com/spreadsheets/d/FILLME/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "=Sheet1",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "7c3dd124-bb75-4037-bccf-28e32818c550",
+      "name": "Get Google sheet contents",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -368,
+        1104
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ITu5LkObPEn3PXmB",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "list_columns_tool",
+        "description": "=### List all column names in trip data\nThis is useful to find out what data is available for each customer. Returns a JSON array containing all the column names.",
+        "workflowId": "={{ $workflow.id }}",
+        "fields": {
+          "values": [
+            {
+              "name": "operation",
+              "stringValue": "column_names"
+            }
+          ]
+        }
+      },
+      "id": "066cf2de-478b-4935-8f14-119b8e0952f4",
+      "name": "List columns tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        832,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "column_values_tool",
+        "description": "=### Get the specified column value for all trips\nThis is useful if you want to find out which customers have a certain value for a given column. Returns an array of JSON objects, one per customer. Each JSON object includes the column being requested, plus the row_number column. (The row_number column can be used to request the full customer data in a second step.). To use this mode, pass the name of the column to fetch.\n\nYou may want to call the 'list columns' tool first to find out which columns you could be fetching.",
+        "workflowId": "={{ $workflow.id }}",
+        "fields": {
+          "values": [
+            {
+              "name": "operation",
+              "stringValue": "column_values"
+            }
+          ]
+        }
+      },
+      "id": "add9d403-0ae3-4e77-b0cd-5abc74fd7b91",
+      "name": "Get column values tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        960,
+        784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json?.operation }}",
+                    "rightValue": "column_names",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "de7ac15f-8109-46a1-ab69-d30bf914a9be"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "col names"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "9fe58592-72e2-4379-9bdb-10da19c8218b",
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json?.operation }}",
+                    "rightValue": "column_values",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "col values"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "c1836f93-7874-43a4-98ff-cc487b276600",
+                    "leftValue": "={{ $('Execute Workflow Trigger').item.json?.operation }}",
+                    "rightValue": "row",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "rows"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5dfc65db-edcd-4d45-b540-766d29dc6f60",
+      "name": "Check operations",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -144,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "={{ $('Execute Workflow Trigger').item.json.query }}",
+              "stringValue": "={{ $json[$('Execute Workflow Trigger').item.json.query] }}"
+            },
+            {
+              "name": "row_number",
+              "stringValue": "={{ $json.row_number }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "21e2eff3-77e4-4f4e-9ef9-4443265c8030",
+      "name": "Prepare column data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        80,
+        1104
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "bf712098-97e4-42cb-8e08-2ee32d19d3e7",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": "={{ $('Execute Workflow Trigger').item.json.query }}"
+            }
+          ]
+        },
+        "options": {
+          "looseTypeValidation": true
+        }
+      },
+      "id": "d535ca15-8fca-4f41-a416-bdd9c5ffac72",
+      "name": "Filter out other rows",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        80,
+        1296
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "response",
+              "stringValue": "={{ Object.keys($json) }}"
+            }
+          ]
+        },
+        "include": "none",
+        "options": {}
+      },
+      "id": "de6d4496-d73b-4fe4-b53e-65c0a5ac2451",
+      "name": "Get column names",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        80,
+        912
+      ],
+      "executeOnce": true,
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  'response': JSON.stringify($input.all().map(x => x.json))\n}"
+      },
+      "id": "29f05711-8b12-4015-af2d-fa1efa1a2d52",
+      "name": "Function Node2",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        304,
+        1104
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "name": "get_trip_details_tool",
+        "description": "=### Get all columns for a given trip\nTo use this mode, pass the row number of the trip. Returns a JSON object with all the column names and their values.",
+        "workflowId": "={{ $workflow.id }}",
+        "fields": {
+          "values": [
+            {
+              "name": "operation",
+              "stringValue": "row"
+            }
+          ]
+        }
+      },
+      "id": "9586b726-b2b2-4639-827a-d24cb462ebba",
+      "name": "Get trip tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        704,
+        784
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Rename Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Keys": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send start message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send help message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Browserbase": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Smart AI Trip Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Smart AI Trip Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Browserbase1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Smart AI Trip Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Smart AI Trip Planner",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Keep or redo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Keep or redo": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Redo Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send end message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Redo Count": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Smart AI Trip Planner",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Send end message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Function Node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Smart AI Trip Planner": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Function Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "General Knowledge AI": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function Node": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Function Node1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Send end message1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List columns tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get column values tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Google sheet contents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google sheet contents": {
+      "main": [
+        [
+          {
+            "node": "Check operations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check operations": {
+      "main": [
+        [
+          {
+            "node": "Get column names",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare column data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter out other rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare column data": {
+      "main": [
+        [
+          {
+            "node": "Function Node2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter out other rows": {
+      "main": [
+        [
+          {
+            "node": "Function Node2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get column names": {
+      "main": [
+        [
+          {
+            "node": "Function Node2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get trip tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "General Knowledge AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ce4cca1d-6f9b-4cc2-abae-fb9c0ec97ef1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "70777e45af9cc05fbfe4d6eb8d81c48b477e3b85ac39e647713ada66a302ee48"
+  },
+  "nodeGroups": [],
+  "id": "JJaIF8dAegbkXEdK",
+  "tags": []
+}
